@@ -1,7 +1,6 @@
 """CLI application for NL-Find."""
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -73,10 +72,12 @@ def display_results(files: list, search_time: float) -> None:
 @app.command()
 def search(
     query: str = typer.Argument(..., help="Natural language search query"),
-    path: Optional[Path] = typer.Option(
+    path: Path | None = typer.Option(
         None, "--path", "-p", help="Directory to search in"
     ),
-    limit: int = typer.Option(100, "--limit", "-n", help="Maximum number of results"),
+    limit: int | None = typer.Option(
+        None, "--limit", "-n", help="Maximum number of results (default: from settings)"
+    ),
     sort: str = typer.Option(
         "name", "--sort", "-s", help="Sort by: name, size, modified, created"
     ),
@@ -128,14 +129,21 @@ def search(
             raise typer.Exit(1)
 
     # Execute search
-    sort_field = SortField(sort) if sort in SortField.__members__.values() else SortField.NAME
+    try:
+        sort_field = SortField(sort)
+    except ValueError:
+        console.print(f"[yellow]Unknown sort field '{sort}', using 'name'[/yellow]")
+        sort_field = SortField.NAME
     sort_order = SortOrder.DESC if desc else SortOrder.ASC
+
+    # Use limit from settings if not explicitly provided
+    actual_limit = limit if limit is not None else settings.search.max_results
 
     params = SearchParams(
         query=search_query,
         sort_by=sort_field,
         sort_order=sort_order,
-        limit=limit,
+        limit=actual_limit,
     )
 
     try:
