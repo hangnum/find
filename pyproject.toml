@@ -30,7 +30,6 @@ dependencies = [
     "typer>=0.9",
     "rich>=13.0",
     "loguru>=0.7",
-    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]

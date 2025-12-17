@@ -159,7 +159,7 @@ def search(
 @app.command()
 def version() -> None:
     """Show version information."""
-    from src import __version__
+    from nl_find import __version__
 
     console.print(f"nfi version {__version__}")
 
