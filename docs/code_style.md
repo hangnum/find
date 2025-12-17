@@ -126,7 +126,7 @@ logger.debug("找到 {} 个文件", len(results))
 
 使用 Conventional Commits：
 
-```
+```txt
 feat: 添加文件预览功能
 fix: 修复搜索路径解析错误
 docs: 更新 README

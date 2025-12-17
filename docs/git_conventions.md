@@ -2,7 +2,7 @@
 
 ## 分支策略
 
-```
+```txt
 main          # 稳定发布版本
 ├── dev       # 开发分支
 │   ├── feat/xxx    # 功能分支
@@ -24,7 +24,7 @@ main          # 稳定发布版本
 
 使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
 
-```
+```txt
 <type>(<scope>): <description>
 
 [optional body]
@@ -118,7 +118,7 @@ Closes #xxx
 
 使用语义化版本 [SemVer](https://semver.org/)：
 
-```
+```txt
 MAJOR.MINOR.PATCH
   │     │     └── 修复向后兼容的 bug
   │     └──────── 添加向后兼容的功能

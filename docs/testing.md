@@ -10,7 +10,7 @@
 
 ## 目录结构
 
-```
+```txt
 tests/
 ├── conftest.py          # 共享 fixtures
 ├── unit/                # 单元测试

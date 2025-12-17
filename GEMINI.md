@@ -5,9 +5,10 @@
 NL-Find is a Python-based utility designed to search for files using natural language queries. It leverages a Large Language Model (LLM) to parse user input and translate it into file system search commands. The project is planned to have both a Command-Line Interface (CLI) built with Typer and a Graphical User Interface (GUI) built with PyQt6.
 
 The architecture is composed of three main layers:
-1.  **User Interface Layer:** CLI and GUI for user interaction.
-2.  **Core Engine Layer:** Handles the core logic of parsing queries, generating search commands, and executing the search.
-3.  **Infrastructure Layer:** Manages interactions with the LLM, file system, and configuration.
+
+1. **User Interface Layer:** CLI and GUI for user interaction.
+2. **Core Engine Layer:** Handles the core logic of parsing queries, generating search commands, and executing the search.
+3. **Infrastructure Layer:** Manages interactions with the LLM, file system, and configuration.
 
 The project is in its early planning and setup stages. The core source code is not yet implemented, but the project structure and development guidelines are well-documented.
 
