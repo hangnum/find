@@ -57,7 +57,7 @@ The tool will automatically load these settings. Alternatively, you can set them
 nfi search "find images larger than 5MB modified this week"
 
 # Or use the GUI
-python -m src.gui.main_window
+python -m nl_find.gui.main_window
 ```
 
 ## 📖 Usage
@@ -88,7 +88,7 @@ nfi search --help
 The GUI provides a familiar file-explorer-like experience.
 
 ```bash
-python -m src.gui.main_window
+python -m nl_find.gui.main_window
 ```
 
 You can type a natural language query or a direct pattern into the search bar. Use the "LLM" checkbox to toggle between modes.
@@ -159,7 +159,7 @@ pytest -v
 ├── pyproject.toml    # Project metadata and dependencies
 ├── README.md         # This file
 ├── requirements.txt
-├── src/
+├── nl_find/
 │   ├── cli/app.py        # CLI entry point (Typer)
 │   ├── config/settings.py  # Configuration models (Pydantic)
 │   ├── core/               # Core application logic

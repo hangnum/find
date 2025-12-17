@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from src.core.models import (
+from nl_find.core.models import (
     FileInfo,
     SearchParams,
     SearchQuery,

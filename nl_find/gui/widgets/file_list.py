@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem,
 )
 
-from src.core.models import FileInfo
+from nl_find.core.models import FileInfo
 
 
 def format_size(size: int) -> str:

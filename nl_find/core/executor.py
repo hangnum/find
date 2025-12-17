@@ -5,13 +5,13 @@ from pathlib import Path
 
 from loguru import logger
 
-from src.config.settings import get_settings
-from src.core.backends import (
+from nl_find.config.settings import get_settings
+from nl_find.core.backends import (
     SearchBackend,
     select_backend,
 )
-from src.core.exceptions import InvalidPathError
-from src.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
+from nl_find.core.exceptions import InvalidPathError
+from nl_find.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
 
 
 class SearchExecutor:

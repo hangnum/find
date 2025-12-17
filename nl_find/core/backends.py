@@ -13,7 +13,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from src.core.models import SearchQuery
+from nl_find.core.models import SearchQuery
 
 
 class SearchBackend(ABC):

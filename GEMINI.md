@@ -14,13 +14,13 @@ The project has implementations for its core engine, CLI, and GUI. It is a funct
 
 The application is built on a three-layer architecture: **UI**, **Core Engine**, and **Infrastructure**.
 
-- **`src/cli/app.py` (Typer)**: The command-line interface.
-- **`src/gui/main_window.py` (PyQt6)**: The graphical user interface.
-- **`src/core/llm_parser.py`**: The `LLMParser` class uses an LLM to convert natural language queries into a structured `SearchQuery` Pydantic model.
-- **`src/core/executor.py`**: The `SearchExecutor` takes a `SearchQuery` and orchestrates the search.
-- **`src/core/backends.py`**: Defines the pluggable search backends (`fd`, `Everything`, `find`, `python`), which are selected based on availability and user preference.
-- **`src/core/models.py`**: Contains all Pydantic data models for structured data transfer (e.g., `SearchQuery`, `FileInfo`).
-- **`src/config/settings.py`**: Manages application configuration using `pydantic-settings`, loading from environment variables and `.env` files.
+- **`nl_find/cli/app.py` (Typer)**: The command-line interface.
+- **`nl_find/gui/main_window.py` (PyQt6)**: The graphical user interface.
+- **`nl_find/core/llm_parser.py`**: The `LLMParser` class uses an LLM to convert natural language queries into a structured `SearchQuery` Pydantic model.
+- **`nl_find/core/executor.py`**: The `SearchExecutor` takes a `SearchQuery` and orchestrates the search.
+- **`nl_find/core/backends.py`**: Defines the pluggable search backends (`fd`, `Everything`, `find`, `python`), which are selected based on availability and user preference.
+- **`nl_find/core/models.py`**: Contains all Pydantic data models for structured data transfer (e.g., `SearchQuery`, `FileInfo`).
+- **`nl_find/config/settings.py`**: Manages application configuration using `pydantic-settings`, loading from environment variables and `.env` files.
 
 ## 4. Building and Running
 
@@ -44,7 +44,7 @@ pip install -e ".[dev]"
 nfi search "find recent python files"
 
 # Run the GUI
-python -m src.gui.main_window
+python -m nl_find.gui.main_window
 ```
 
 ## 5. Development Conventions

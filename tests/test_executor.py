@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from src.core.exceptions import InvalidPathError
-from src.core.executor import SearchExecutor
-from src.core.models import SearchParams, SearchQuery, SortField, SortOrder
+from nl_find.core.exceptions import InvalidPathError
+from nl_find.core.executor import SearchExecutor
+from nl_find.core.models import SearchParams, SearchQuery, SortField, SortOrder
 
 
 class TestSearchExecutor:

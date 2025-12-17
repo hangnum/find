@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.core.backends import (
+from nl_find.core.backends import (
     BACKENDS,
     EverythingBackend,
     FdBackend,
@@ -17,7 +17,7 @@ from src.core.backends import (
     get_available_backends,
     select_backend,
 )
-from src.core.models import SearchQuery
+from nl_find.core.models import SearchQuery
 
 
 class TestPythonBackend:

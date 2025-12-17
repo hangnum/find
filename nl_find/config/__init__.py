@@ -1,5 +1,5 @@
 """Configuration module for NL-Find."""
 
-from src.config.settings import Settings
+from nl_find.config.settings import Settings
 
 __all__ = ["Settings"]

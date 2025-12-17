@@ -45,14 +45,22 @@ dev = [
     "isort>=5.12",
     "ruff>=0.1",
 ]
-all = ["nl-find[gui,dev]"]
+all = [
+    "PyQt6>=6.5",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21",
+    "black>=23.0",
+    "isort>=5.12",
+    "ruff>=0.1",
+]
 
 [project.scripts]
-nfi = "src.cli.app:main"
+nfi = "nl_find.cli.app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["nl_find*"]
 
 [tool.black]
 line-length = 88

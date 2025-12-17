@@ -7,14 +7,14 @@ from typing import Any
 from loguru import logger
 from openai import OpenAI
 
-from src.config.settings import get_settings
-from src.core.exceptions import (
+from nl_find.config.settings import get_settings
+from nl_find.core.exceptions import (
     LLMConnectionError,
     LLMParseError,
     LLMResponseError,
     MissingAPIKeyError,
 )
-from src.core.models import SearchQuery
+from nl_find.core.models import SearchQuery
 
 SYSTEM_PROMPT_TEMPLATE = """你是一个文件搜索查询解析器。用户会用自然语言描述他们想要搜索的文件，你需要将其转换为结构化的搜索参数。
 

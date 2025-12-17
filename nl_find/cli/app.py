@@ -6,16 +6,16 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.config.settings import get_settings
-from src.core.exceptions import (
+from nl_find.config.settings import get_settings
+from nl_find.core.exceptions import (
     InvalidPathError,
     LLMConnectionError,
     LLMParseError,
     MissingAPIKeyError,
 )
-from src.core.executor import SearchExecutor
-from src.core.llm_parser import LLMParser
-from src.core.models import SearchParams, SearchQuery, SortField, SortOrder
+from nl_find.core.executor import SearchExecutor
+from nl_find.core.llm_parser import LLMParser
+from nl_find.core.models import SearchParams, SearchQuery, SortField, SortOrder
 
 app = typer.Typer(
     name="nfi",

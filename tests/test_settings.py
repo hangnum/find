@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.config.settings import (
+from nl_find.config.settings import (
     LLMSettings,
     SearchSettings,
     Settings,

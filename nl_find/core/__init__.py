@@ -1,6 +1,6 @@
 """Core engine module for NL-Find."""
 
-from src.core.exceptions import (
+from nl_find.core.exceptions import (
     ConfigError,
     InvalidConfigError,
     InvalidPathError,
@@ -13,8 +13,8 @@ from src.core.exceptions import (
     PermissionDeniedError,
     SearchError,
 )
-from src.core.executor import SearchExecutor
-from src.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
+from nl_find.core.executor import SearchExecutor
+from nl_find.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
 
 __all__ = [
     # Models

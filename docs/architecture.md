@@ -53,7 +53,7 @@ The project is organized into modules with clear responsibilities.
 
 ```txt
 D:/code/find/
-├── src/
+├── nl_find/
 │   ├── cli/app.py            # CLI entry point (Typer)
 │   ├── config/settings.py      # Configuration models (Pydantic)
 │   ├── core/                   # Core application logic

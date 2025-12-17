@@ -16,12 +16,12 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.config.settings import get_settings
-from src.core.executor import SearchExecutor
-from src.core.models import SearchParams, SearchQuery, SearchResult
-from src.gui.widgets.dir_tree import DirectoryTree
-from src.gui.widgets.file_list import FileListWidget
-from src.gui.widgets.search_bar import SearchBar
+from nl_find.config.settings import get_settings
+from nl_find.core.executor import SearchExecutor
+from nl_find.core.models import SearchParams, SearchQuery, SearchResult
+from nl_find.gui.widgets.dir_tree import DirectoryTree
+from nl_find.gui.widgets.file_list import FileListWidget
+from nl_find.gui.widgets.search_bar import SearchBar
 
 
 class SearchWorker(QThread):
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
         if use_llm:
             # Use LLM parsing (requires API key)
             try:
-                from src.core.llm_parser import LLMParser
+                from nl_find.core.llm_parser import LLMParser
 
                 parser = LLMParser()
                 search_query = parser.parse(query_text)

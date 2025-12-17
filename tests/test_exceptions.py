@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.core.exceptions import (
+from nl_find.core.exceptions import (
     ConfigError,
     InvalidConfigError,
     InvalidPathError,

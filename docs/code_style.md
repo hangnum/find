@@ -56,7 +56,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 # 3. 本项目模块
-from src.core.models import SearchQuery
+from nl_find.core.models import SearchQuery
 ```
 
 ### 文档字符串
