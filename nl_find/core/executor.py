@@ -92,6 +92,10 @@ class SearchExecutor:
     def _post_filter(self, path: Path, query: SearchQuery) -> bool:
         """Apply filters that backends may not fully support.
 
+        This ensures consistent results regardless of which backend is selected.
+        Backends are treated as "candidate generators" - this method applies
+        all semantic filters to guarantee correctness.
+
         Args:
             path: Path to check.
             query: Search query with filters.
@@ -99,6 +103,46 @@ class SearchExecutor:
         Returns:
             True if path passes all filters.
         """
+        import fnmatch
+
+        # Skip directories (should only include files)
+        if path.is_dir():
+            return False
+
+        # Hidden files filter
+        if not query.include_hidden and path.name.startswith("."):
+            return False
+
+        # Pattern filter
+        if query.pattern and not fnmatch.fnmatch(path.name, query.pattern):
+            return False
+
+        # Extension filter
+        if query.extensions:
+            if path.suffix.lower() not in [ext.lower() for ext in query.extensions]:
+                return False
+
+        # Size and modification time filters require stat
+        try:
+            stat = path.stat()
+
+            # Size filters
+            if query.min_size is not None and stat.st_size < query.min_size:
+                return False
+            if query.max_size is not None and stat.st_size > query.max_size:
+                return False
+
+            # Modification time filters
+            if query.modified_after is not None:
+                if stat.st_mtime < query.modified_after.timestamp():
+                    return False
+            if query.modified_before is not None:
+                if stat.st_mtime > query.modified_before.timestamp():
+                    return False
+
+        except (OSError, PermissionError):
+            return False
+
         # Content pattern search (expensive, must be done in Python)
         if query.content_pattern:
             if not self._content_matches(path, query.content_pattern):

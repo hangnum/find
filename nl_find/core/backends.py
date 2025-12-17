@@ -276,6 +276,10 @@ class FindBackend(SearchBackend):
     def _build_command(self, query: SearchQuery) -> list[str]:
         """Build find command from query.
 
+        Note: Size and time filters are handled by SearchExecutor._post_filter()
+        to ensure consistent behavior and avoid edge cases with find's
+        approximate filtering (e.g., -size -0k, -mtime -0).
+
         Args:
             query: Search query.
 
@@ -304,20 +308,8 @@ class FindBackend(SearchBackend):
                 cmd.extend(["-name", f"*{ext}"])
             cmd.append(")")
 
-        # Size filters
-        if query.min_size is not None:
-            size_k = query.min_size // 1024 or 1
-            cmd.extend(["-size", f"+{size_k}k"])
-        if query.max_size is not None:
-            size_k = query.max_size // 1024
-            cmd.extend(["-size", f"-{size_k}k"])
-
-        # Time filters
-        if query.modified_after is not None:
-            from datetime import datetime
-            days = (datetime.now() - query.modified_after).days
-            if days >= 0:
-                cmd.extend(["-mtime", f"-{days}"])
+        # Note: Size and mtime filters are NOT applied here.
+        # They are handled by SearchExecutor._post_filter() for precision.
 
         return cmd
 
@@ -391,8 +383,17 @@ class EverythingBackend(SearchBackend):
                 if line:
                     path = Path(line)
                     # Filter by query.path since Everything searches globally
-                    if str(path).startswith(str(query.path)):
-                        yield path
+                    # Use resolve() and case-insensitive comparison for Windows
+                    try:
+                        resolved_path = path.resolve()
+                        resolved_query = query.path.resolve()
+                        # Check if path is under query.path (case-insensitive on Windows)
+                        if resolved_path.is_relative_to(resolved_query):
+                            yield path
+                    except (OSError, ValueError):
+                        # Fallback: simple string comparison (normalized)
+                        if str(path).lower().startswith(str(query.path).lower()):
+                            yield path
 
         except subprocess.TimeoutExpired:
             logger.error("Everything search timed out")
