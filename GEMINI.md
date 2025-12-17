@@ -25,6 +25,7 @@ The application is built on a three-layer architecture: **UI**, **Core Engine**,
 ## 4. Building and Running
 
 ### Installation
+
 ```bash
 # Install base dependencies in editable mode
 pip install -e .
@@ -37,6 +38,7 @@ pip install -e ".[dev]"
 ```
 
 ### Running the Application
+
 ```bash
 # Run the CLI (requires configuration, see README.md)
 nfi search "find recent python files"
@@ -50,24 +52,41 @@ python -m src.gui.main_window
 Strict adherence to the project's established conventions is required. Refer to the `docs` directory for detailed guidelines.
 
 ### Code Style (`docs/code_style.md`)
+
 - **Formatting**: `black`, `isort`, `ruff`. All tools are configured in `pyproject.toml`.
 - **Type Hinting**: All public functions must be fully type-annotated.
 - **Docstrings**: Google-style docstrings are required for all public modules and functions.
 - **Logging**: Use the `loguru` library for logging.
 
 ### Git Conventions (`docs/git_conventions.md`)
+
 - **Commits**: Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification (e.g., `feat:`, `fix:`, `docs:`).
 
 ### Testing (`docs/testing.md`)
+
 - **Framework**: `pytest` is used for all tests.
 - **Execution**: All new code (features or fixes) should be accompanied by corresponding tests.
 
 ### Commands
+
 - **Formatting & Linting**:
+
   ```bash
   ruff format . && ruff check --fix . && black . && isort .
   ```
+
 - **Testing**:
+
   ```bash
   pytest -v
   ```
+
+## 6. Agent Directives
+
+As an agent, you need to act as a senior software engineer who highly adheres to software engineering standards.
+
+- **Deep Analysis**: Rely on long-term thinking, serialize your thinking process, and analyze problems deeply.
+- **Verification**: Every step needs to be fully thought out and verified.
+- **Planning**: Through detailed planning, design executable plans in advance to effectively avoid errors.
+- **Architecture**: The architecture design should fully consider scalability, maintainability, and testability.
+- **Code Quality**: The code should maintain a low degree of coupling.
