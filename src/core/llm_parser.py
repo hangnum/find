@@ -1,7 +1,8 @@
 """LLM parser for converting natural language to search queries."""
 
 import json
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import Any
 
 from loguru import logger
 from openai import OpenAI
@@ -15,13 +16,15 @@ from src.core.exceptions import (
 )
 from src.core.models import SearchQuery
 
-SYSTEM_PROMPT = """你是一个文件搜索查询解析器。用户会用自然语言描述他们想要搜索的文件，你需要将其转换为结构化的搜索参数。
+SYSTEM_PROMPT_TEMPLATE = """你是一个文件搜索查询解析器。用户会用自然语言描述他们想要搜索的文件，你需要将其转换为结构化的搜索参数。
+
+今天的日期是：{today}
 
 返回一个 JSON 对象，包含以下可选字段：
 - pattern: 文件名模式（支持通配符 * 和 ?）
 - extensions: 文件扩展名列表（例如 [".py", ".txt"]）
-- min_size: 最小文件大小（字节），支持解析 "10MB" 这样的表达
-- max_size: 最大文件大小（字节）
+- min_size: 最小文件大小（字节数，整数）
+- max_size: 最大文件大小（字节数，整数）
 - modified_after: 修改时间晚于此日期（ISO 格式，如 "2024-01-01"）
 - modified_before: 修改时间早于此日期（ISO 格式）
 - content_pattern: 文件内容搜索模式
@@ -31,11 +34,11 @@ SYSTEM_PROMPT = """你是一个文件搜索查询解析器。用户会用自然�
 重要规则：
 1. 只返回 JSON，不要有其他文字
 2. 只包含用户明确提到的字段
-3. 大小单位转换：1KB=1024, 1MB=1048576, 1GB=1073741824
-4. 时间表达式：
-   - "最近一周" = 7天前到现在
-   - "今天" = 今天0点到现在
-   - "昨天" = 昨天0点到今天0点
+3. 大小必须转换为字节数（整数）：1KB=1024, 1MB=1048576, 1GB=1073741824
+4. 时间表达式必须转换为具体日期：
+   - "最近一周" = 从 {week_ago} 到现在
+   - "今天" = {today}
+   - "昨天" = {yesterday}
 5. 文件类型映射：
    - "Python 文件" -> [".py"]
    - "图片" -> [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"]
@@ -44,7 +47,7 @@ SYSTEM_PROMPT = """你是一个文件搜索查询解析器。用户会用自然�
 
 示例：
 输入: "找出最近一周修改的大于10MB的Python文件"
-输出: {"extensions": [".py"], "min_size": 10485760, "modified_after": "2024-12-10"}
+输出: {{"extensions": [".py"], "min_size": 10485760, "modified_after": "{week_ago}"}}
 """
 
 
@@ -76,7 +79,7 @@ class LLMParser:
         model: Model name to use.
     """
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         """Initialize the LLM parser.
 
         Args:
@@ -106,6 +109,42 @@ class LLMParser:
         )
         logger.debug(f"LLMParser initialized with model: {self.model}")
 
+    def _get_dynamic_prompt(self) -> str:
+        """Generate system prompt with current date injected.
+
+        Returns:
+            System prompt with today's date and relative date references.
+        """
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        week_ago = today - timedelta(days=7)
+
+        return SYSTEM_PROMPT_TEMPLATE.format(
+            today=today.isoformat(),
+            yesterday=yesterday.isoformat(),
+            week_ago=week_ago.isoformat(),
+        )
+
+    def _preprocess_llm_data(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Preprocess LLM response data before creating SearchQuery.
+
+        Handles:
+        - Converting size strings ("10MB") to bytes (int)
+        - Any other data transformations needed
+
+        Args:
+            data: Raw JSON data from LLM response.
+
+        Returns:
+            Preprocessed data suitable for SearchQuery constructor.
+        """
+        # Convert size strings to bytes if needed
+        for key in ["min_size", "max_size"]:
+            if key in data and isinstance(data[key], str):
+                data[key] = _parse_size(data[key])
+
+        return data
+
     def parse(self, query: str) -> SearchQuery:
         """Parse natural language query to SearchQuery.
 
@@ -126,7 +165,7 @@ class LLMParser:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": self._get_dynamic_prompt()},
                     {"role": "user", "content": query},
                 ],
                 temperature=self.temperature,
@@ -155,6 +194,9 @@ class LLMParser:
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response as JSON: {content}")
             raise LLMParseError(f"Invalid JSON response from LLM: {e}") from e
+
+        # Preprocess data (convert size strings to bytes, etc.)
+        data = self._preprocess_llm_data(data)
 
         # Build SearchQuery from parsed data
         try:
