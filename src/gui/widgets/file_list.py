@@ -1,10 +1,9 @@
 """File list widget for NL-Find GUI."""
 
 from pathlib import Path
-from typing import Optional
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import QModelIndex, Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QAction, QDesktopServices
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
@@ -129,34 +128,34 @@ class FileListWidget(QTableWidget):
 
         menu.exec(self.mapToGlobal(pos))
 
-    def _get_selected_file(self) -> Optional[FileInfo]:
+    def _get_selected_file(self) -> FileInfo | None:
         """Get the currently selected file."""
         row = self.currentRow()
         if 0 <= row < len(self._files):
             return self._files[row]
         return None
 
-    def _on_double_click(self) -> None:
-        """Handle double click on file."""
+    def _on_double_click(self, index: QModelIndex) -> None:
+        """Handle double click on file.
+
+        Args:
+            index: The model index of the clicked item.
+        """
         file = self._get_selected_file()
         if file:
             self.file_double_clicked.emit(file.path)
 
     def _open_selected(self) -> None:
-        """Open selected file with default application."""
-        import os
-
+        """Open selected file with default application (cross-platform)."""
         file = self._get_selected_file()
         if file:
-            os.startfile(file.path)
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(file.path)))
 
     def _open_folder(self) -> None:
-        """Open containing folder in file explorer."""
-        import subprocess
-
+        """Open containing folder in file explorer (cross-platform)."""
         file = self._get_selected_file()
         if file:
-            subprocess.run(["explorer", "/select,", str(file.path)])
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(file.path.parent)))
 
     def _copy_path(self) -> None:
         """Copy file path to clipboard."""

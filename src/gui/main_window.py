@@ -2,13 +2,12 @@
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 from loguru import logger
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, QUrl, pyqtSignal
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (
     QApplication,
-    QHBoxLayout,
     QMainWindow,
     QMessageBox,
     QSplitter,
@@ -19,7 +18,7 @@ from PyQt6.QtWidgets import (
 
 from src.config.settings import get_settings
 from src.core.executor import SearchExecutor
-from src.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
+from src.core.models import SearchParams, SearchQuery, SearchResult
 from src.gui.widgets.dir_tree import DirectoryTree
 from src.gui.widgets.file_list import FileListWidget
 from src.gui.widgets.search_bar import SearchBar
@@ -56,7 +55,7 @@ class MainWindow(QMainWindow):
 
         self.settings = get_settings()
         self.current_path = Path.cwd()
-        self.search_worker: Optional[SearchWorker] = None
+        self.search_worker: SearchWorker | None = None
 
         self._setup_ui()
         self._connect_signals()
@@ -99,6 +98,7 @@ class MainWindow(QMainWindow):
         """Connect widget signals to slots."""
         self.search_bar.search_requested.connect(self._on_search)
         self.dir_tree.path_selected.connect(self._on_path_selected)
+        self.file_list.file_double_clicked.connect(self._on_file_double_clicked)
 
     def _apply_styles(self) -> None:
         """Apply dark theme styles."""
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
                 recursive=True,
             )
 
-        params = SearchParams(query=search_query, limit=1000)
+        params = SearchParams(query=search_query, limit=self.settings.search.max_results)
 
         # Run search in background
         self.search_worker = SearchWorker(params)
@@ -194,6 +194,14 @@ class MainWindow(QMainWindow):
         """
         self.current_path = path
         self.status_bar.showMessage(f"Current: {path}")
+
+    def _on_file_double_clicked(self, path: Path) -> None:
+        """Handle file double click - open with default application.
+
+        Args:
+            path: Path to the file to open.
+        """
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
 
 def main() -> None:
