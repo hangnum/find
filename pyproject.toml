@@ -48,7 +48,7 @@ dev = [
 all = ["nl-find[gui,dev]"]
 
 [project.scripts]
-nl-find = "src.cli.app:main"
+nfi = "src.cli.app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

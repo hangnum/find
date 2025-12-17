@@ -27,13 +27,13 @@ pip install -e ".[dev]"
 
 ```bash
 # 自然语言搜索（需要 OPENAI_API_KEY）
-nl-find search "找出最近修改的 Python 文件"
+nfi search "找出最近修改的 Python 文件"
 
 # 直接模式搜索（无需 API）
-nl-find search "*.py" --no-llm --path ./src
+nfi search "*.py" --no-llm --path ./src
 
 # 查看帮助
-nl-find --help
+nfi --help
 ```
 
 ### 图形界面

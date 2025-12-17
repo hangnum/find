@@ -19,7 +19,7 @@ from src.core.llm_parser import LLMParser
 from src.core.models import SearchParams, SearchQuery, SortField, SortOrder
 
 app = typer.Typer(
-    name="nl-find",
+    name="nfi",
     help="Natural language file search powered by LLM.",
     add_completion=True,
 )
@@ -88,9 +88,9 @@ def search(
     """Search files using natural language query.
 
     Examples:
-        nl-find "找出最近修改的Python文件"
-        nl-find "大于10MB的视频文件" --path ./videos
-        nl-find "*.py" --no-llm --path ./src
+        nfi search "找出最近修改的Python文件"
+        nfi search "大于10MB的视频文件" --path ./videos
+        nfi search "*.py" --no-llm --path ./src
     """
     settings = get_settings()
     search_path = path or settings.search.default_path
@@ -153,7 +153,7 @@ def version() -> None:
     """Show version information."""
     from src import __version__
 
-    console.print(f"nl-find version {__version__}")
+    console.print(f"nfi version {__version__}")
 
 
 def main() -> None:
