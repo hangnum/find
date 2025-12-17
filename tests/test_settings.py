@@ -44,6 +44,34 @@ class TestLLMSettings:
         assert settings.provider == "ollama"
         assert settings.base_url == "http://localhost:11434"
 
+    def test_custom_provider(self):
+        """Test custom provider name (e.g., DeepSeek)."""
+        settings = LLMSettings(
+            provider="deepseek",
+            base_url="https://api.deepseek.com/v1",
+            model="deepseek-chat",
+        )
+        assert settings.provider == "deepseek"
+        assert settings.base_url == "https://api.deepseek.com/v1"
+        assert settings.model == "deepseek-chat"
+
+    def test_api_key_from_llm_prefix(self):
+        """Test API key loading from LLM_API_KEY environment variable."""
+        with patch.dict(os.environ, {"LLM_API_KEY": "llm-key-456"}, clear=False):
+            settings = LLMSettings()
+            assert settings.api_key == "llm-key-456"
+
+    def test_api_key_priority(self):
+        """Test LLM_API_KEY takes priority over OPENAI_API_KEY."""
+        with patch.dict(
+            os.environ,
+            {"LLM_API_KEY": "llm-key", "OPENAI_API_KEY": "openai-key"},
+            clear=False,
+        ):
+            settings = LLMSettings()
+            # LLM_API_KEY should be checked first
+            assert settings.api_key == "llm-key"
+
 
 class TestSearchSettings:
     """Tests for search configuration."""

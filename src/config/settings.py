@@ -3,27 +3,40 @@
 from pathlib import Path
 from typing import Literal, Optional
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LLMSettings(BaseSettings):
     """LLM provider settings.
 
+    Supports any OpenAI API-compatible provider (OpenAI, DeepSeek, Ollama, etc.).
+
     Attributes:
-        provider: LLM provider name (openai or ollama).
+        provider: LLM provider name (e.g., openai, deepseek, ollama).
         model: Model name to use.
-        api_key: API key for the provider.
+        api_key: API key for the provider. Set via LLM_API_KEY or OPENAI_API_KEY.
         base_url: Base URL for the API endpoint.
         temperature: Temperature for response generation.
         max_tokens: Maximum tokens in response.
+
+    Environment Variables:
+        LLM_PROVIDER: Provider name (default: openai)
+        LLM_MODEL: Model name (default: gpt-4o-mini)
+        LLM_API_KEY or OPENAI_API_KEY: API key
+        LLM_BASE_URL: Custom API endpoint URL
+        LLM_TEMPERATURE: Temperature (default: 0.0)
+        LLM_MAX_TOKENS: Max tokens (default: 1024)
     """
 
     model_config = SettingsConfigDict(env_prefix="LLM_")
 
-    provider: Literal["openai", "ollama"] = "openai"
+    provider: str = "openai"
     model: str = "gpt-4o-mini"
-    api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
+    api_key: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("LLM_API_KEY", "OPENAI_API_KEY"),
+    )
     base_url: Optional[str] = None
     temperature: float = 0.0
     max_tokens: int = 1024

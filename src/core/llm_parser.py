@@ -91,8 +91,9 @@ class LLMParser:
         self.api_key = api_key or settings.llm.api_key
         if not self.api_key:
             raise MissingAPIKeyError(
-                "OpenAI API key not configured. "
-                "Set OPENAI_API_KEY environment variable or pass api_key parameter."
+                "LLM API key not configured. "
+                "Set LLM_API_KEY or OPENAI_API_KEY environment variable, "
+                "or pass api_key parameter."
             )
 
         self.model = model or settings.llm.model
