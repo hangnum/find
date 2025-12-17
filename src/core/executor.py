@@ -3,10 +3,16 @@
 import fnmatch
 import time
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Optional
 
 from loguru import logger
 
+from src.config.settings import get_settings
+from src.core.backends import (
+    PythonBackend,
+    SearchBackend,
+    select_backend,
+)
 from src.core.exceptions import InvalidPathError, PermissionDeniedError
 from src.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
 
@@ -15,8 +21,23 @@ class SearchExecutor:
     """Executor that performs file system searches based on SearchParams.
 
     This class handles the actual file system traversal and filtering
-    based on the parsed search query.
+    based on the parsed search query. It uses a pluggable backend system
+    to leverage system-level search tools when available.
+
+    Attributes:
+        backend: The search backend being used.
     """
+
+    def __init__(self, backend: Optional[SearchBackend] = None):
+        """Initialize the search executor.
+
+        Args:
+            backend: Optional search backend. If None, auto-selects best available.
+        """
+        settings = get_settings()
+        backend_preference = settings.search.backend
+        self.backend = backend or select_backend(backend_preference)
+        logger.info(f"SearchExecutor using backend: {self.backend.name}")
 
     def execute(self, params: SearchParams) -> SearchResult:
         """Execute a search and return results.
@@ -41,15 +62,22 @@ class SearchExecutor:
         if not query.path.is_dir():
             raise InvalidPathError(f"Path is not a directory: {query.path}")
 
-        logger.info(f"Searching in: {query.path}")
+        logger.info(f"Searching in: {query.path} (backend: {self.backend.name})")
         logger.debug(f"Query: {query}")
 
-        # Collect matching files
+        # Collect matching files using the backend
         files: list[FileInfo] = []
-        for file_info in self._search_files(query):
-            files.append(file_info)
-            if len(files) >= params.limit:
-                break
+        for path in self.backend.search(query):
+            try:
+                # Apply additional filters not handled by backend
+                if self._post_filter(path, query):
+                    file_info = FileInfo.from_path(path)
+                    files.append(file_info)
+                    if len(files) >= params.limit:
+                        break
+            except (OSError, PermissionError) as e:
+                logger.warning(f"Cannot access file {path}: {e}")
+                continue
 
         # Sort results
         files = self._sort_files(files, params)
@@ -64,84 +92,17 @@ class SearchExecutor:
             search_time=search_time,
         )
 
-    def _search_files(self, query: SearchQuery) -> Generator[FileInfo, None, None]:
-        """Generate matching files based on query.
-
-        Args:
-            query: Search query with filters.
-
-        Yields:
-            FileInfo for each matching file.
-        """
-        try:
-            if query.recursive:
-                paths = query.path.rglob("*")
-            else:
-                paths = query.path.glob("*")
-
-            for path in paths:
-                if self._matches_query(path, query):
-                    try:
-                        yield FileInfo.from_path(path)
-                    except (OSError, PermissionError) as e:
-                        logger.warning(f"Cannot access file {path}: {e}")
-                        continue
-
-        except PermissionError as e:
-            raise PermissionDeniedError(f"Permission denied: {query.path}") from e
-
-    def _matches_query(self, path: Path, query: SearchQuery) -> bool:
-        """Check if a path matches the search query.
+    def _post_filter(self, path: Path, query: SearchQuery) -> bool:
+        """Apply filters that backends may not fully support.
 
         Args:
             path: Path to check.
             query: Search query with filters.
 
         Returns:
-            True if path matches all query criteria.
+            True if path passes all filters.
         """
-        # Skip directories unless specifically searching for them
-        if path.is_dir():
-            return False
-
-        # Skip hidden files if not included
-        if not query.include_hidden and path.name.startswith("."):
-            return False
-
-        # Check filename pattern
-        if query.pattern and not fnmatch.fnmatch(path.name, query.pattern):
-            return False
-
-        # Check extensions
-        if query.extensions:
-            if path.suffix.lower() not in [ext.lower() for ext in query.extensions]:
-                return False
-
-        # Check file size
-        try:
-            stat = path.stat()
-
-            if query.min_size is not None and stat.st_size < query.min_size:
-                return False
-
-            if query.max_size is not None and stat.st_size > query.max_size:
-                return False
-
-            # Check modification time
-            if query.modified_after is not None:
-                mtime = stat.st_mtime
-                if mtime < query.modified_after.timestamp():
-                    return False
-
-            if query.modified_before is not None:
-                mtime = stat.st_mtime
-                if mtime > query.modified_before.timestamp():
-                    return False
-
-        except (OSError, PermissionError):
-            return False
-
-        # Check content pattern (expensive - do last)
+        # Content pattern search (expensive, must be done in Python)
         if query.content_pattern:
             if not self._content_matches(path, query.content_pattern):
                 return False
@@ -188,3 +149,4 @@ class SearchExecutor:
 
         key_func = key_map.get(params.sort_by.value, key_map["name"])
         return sorted(files, key=key_func, reverse=reverse)
+

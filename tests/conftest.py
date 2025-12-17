@@ -53,3 +53,17 @@ def large_file(tmp_path: Path) -> Generator[Path, None, None]:
     large = tmp_path / "large.bin"
     large.write_bytes(b"x" * (1024 * 1024))  # 1MB
     yield large
+
+
+@pytest.fixture
+def temp_directory(temp_files: Path) -> Path:
+    """Alias for temp_files fixture for backend tests.
+
+    Args:
+        temp_files: The temp_files fixture.
+
+    Returns:
+        Path to the temporary directory with sample files.
+    """
+    return temp_files
+

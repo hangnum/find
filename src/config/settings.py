@@ -46,14 +46,21 @@ class SearchSettings(BaseSettings):
     """Search behavior settings.
 
     Attributes:
+        backend: Search backend preference (auto, fd, find, everything, python).
         default_path: Default search path.
         max_results: Maximum number of results to return.
         include_hidden: Whether to include hidden files by default.
         recursive: Whether to search recursively by default.
+
+    Environment Variables:
+        SEARCH_BACKEND: Backend preference (default: auto)
+        SEARCH_DEFAULT_PATH: Default search directory
+        SEARCH_MAX_RESULTS: Result limit (default: 1000)
     """
 
     model_config = SettingsConfigDict(env_prefix="SEARCH_")
 
+    backend: str = "auto"  # auto, fd, find, everything, python
     default_path: Path = Field(default_factory=Path.cwd)
     max_results: int = 1000
     include_hidden: bool = False

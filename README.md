@@ -72,6 +72,37 @@ tests/          # 测试
 docs/           # 文档
 ```
 
+## 搜索后端
+
+NL-Find 支持多种搜索后端，自动选择最优方案：
+
+| 后端 | 平台 | 速度 | 说明 |
+|------|------|------|------|
+| **fd** | 跨平台 | ⚡⚡⚡ | 推荐安装，比 Python 快 10 倍 |
+| Everything | Windows | ⚡⚡⚡⚡ | 毫秒级搜索（基于索引） |
+| find | Linux/macOS | ⚡⚡ | 系统原生 |
+| Python | 跨平台 | ⚡ | 默认回退 |
+
+### 安装高速后端
+
+```bash
+# Windows - 安装 fd
+winget install sharkdp.fd
+
+# Windows - 安装 Everything (可选)
+scripts\install_everything.bat
+
+# Linux/macOS - 安装 fd
+./scripts/install_fd.sh
+```
+
+### 配置后端
+
+```bash
+# 环境变量配置
+SEARCH_BACKEND=auto  # auto, fd, find, everything, python
+```
+
 ## License
 
 MIT
