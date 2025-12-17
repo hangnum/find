@@ -1,19 +1,16 @@
 """Search executor for file system operations."""
 
-import fnmatch
 import time
 from pathlib import Path
-from typing import Generator, Optional
 
 from loguru import logger
 
 from src.config.settings import get_settings
 from src.core.backends import (
-    PythonBackend,
     SearchBackend,
     select_backend,
 )
-from src.core.exceptions import InvalidPathError, PermissionDeniedError
+from src.core.exceptions import InvalidPathError
 from src.core.models import FileInfo, SearchParams, SearchQuery, SearchResult
 
 
@@ -28,7 +25,7 @@ class SearchExecutor:
         backend: The search backend being used.
     """
 
-    def __init__(self, backend: Optional[SearchBackend] = None):
+    def __init__(self, backend: SearchBackend | None = None):
         """Initialize the search executor.
 
         Args:
@@ -73,14 +70,14 @@ class SearchExecutor:
                 if self._post_filter(path, query):
                     file_info = FileInfo.from_path(path)
                     files.append(file_info)
-                    if len(files) >= params.limit:
-                        break
             except (OSError, PermissionError) as e:
                 logger.warning(f"Cannot access file {path}: {e}")
                 continue
 
-        # Sort results
+        # Sort results first, then apply limit
+        # This ensures "sort by X, take top N" returns correct results
         files = self._sort_files(files, params)
+        files = files[: params.limit]
 
         search_time = time.time() - start_time
         logger.info(f"Found {len(files)} files in {search_time:.2f}s")
