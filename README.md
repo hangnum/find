@@ -12,7 +12,7 @@
 - 💻 **Versatile Interfaces**: Use it as a fast command-line tool or a user-friendly GUI application.
 - 🌐 **Provider Agnostic**: Compatible with any OpenAI API-compliant LLM provider (OpenAI, DeepSeek, Ollama, etc.).
 - ⚙️ **Customizable**: Extensive configuration options for search behavior, LLM settings, and UI.
--  fallback **Direct Search**: Bypass the LLM for traditional glob/pattern-based searches.
+- fallback **Direct Search**: Bypass the LLM for traditional glob/pattern-based searches.
 
 ## 🚀 Quick Start
 

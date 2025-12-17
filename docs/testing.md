@@ -39,6 +39,7 @@ tests/
 ## 4. Writing Good Tests
 
 ### The AAA Pattern (Arrange, Act, Assert)
+
 Structure your tests clearly using the AAA pattern.
 
 ```python
@@ -59,6 +60,7 @@ def test_search_for_python_files():
 ```
 
 ### Use Fixtures for Setup and Teardown
+
 Use `pytest` fixtures to manage shared resources and setup/teardown logic. Place reusable fixtures in `tests/conftest.py`.
 
 ```python
@@ -81,6 +83,7 @@ def test_search_in_directory(temp_directory_with_files):
 ```
 
 ### Mock External Services
+
 Mock external services like the LLM API to make tests fast, deterministic, and independent of network or API keys.
 
 ```python
@@ -105,6 +108,7 @@ def test_parser_uses_mocked_llm_response(mocker):
 ## 5. Running Tests
 
 ### Commands
+
 ```bash
 # Run all tests
 pytest -v
@@ -120,6 +124,7 @@ pytest -m "slow"
 ```
 
 ### Test Markers
+
 Use markers to categorize tests.
 
 - `@pytest.mark.slow`: For tests that take a significant amount of time.

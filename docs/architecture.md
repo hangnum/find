@@ -82,15 +82,17 @@ D:/code/find/
 ## 3. Core Components
 
 ### `core.models`
+
 - **Purpose**: Defines the data structures used throughout the application.
 - **Technology**: Pydantic.
 - **Key Models**:
-    - `SearchQuery`: The structured output from the `LLMParser`, containing all search criteria.
-    - `SearchParams`: Wraps a `SearchQuery` with execution parameters like sorting and limits.
-    - `FileInfo`: Represents a single file in the search results.
-    - `SearchResult`: The final object returned by the executor, containing results and metadata.
+  - `SearchQuery`: The structured output from the `LLMParser`, containing all search criteria.
+  - `SearchParams`: Wraps a `SearchQuery` with execution parameters like sorting and limits.
+  - `FileInfo`: Represents a single file in the search results.
+  - `SearchResult`: The final object returned by the executor, containing results and metadata.
 
 ### `core.llm_parser.LLMParser`
+
 - **Purpose**: Converts a user's natural language query into a structured `SearchQuery` object.
 - **Process**:
     1. Injects the user's query and current date information into a detailed system prompt.
@@ -100,6 +102,7 @@ D:/code/find/
     5. Instantiates and returns a `SearchQuery` model.
 
 ### `core.executor.SearchExecutor`
+
 - **Purpose**: Orchestrates the file search process.
 - **Process**:
     1. Receives `SearchParams`.
@@ -110,6 +113,7 @@ D:/code/find/
     6. Returns a `SearchResult` object.
 
 ### `core.backends`
+
 - **Purpose**: Provides concrete implementations for searching the file system.
 - **Strategy**: A pluggable system where each backend is a class inheriting from the `SearchBackend` ABC. This allows leveraging fast, native tools.
 - **Implementations**: `FdBackend`, `EverythingBackend`, `FindBackend`, `PythonBackend`.
