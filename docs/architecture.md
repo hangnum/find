@@ -1,167 +1,178 @@
-# NL-Find 项目架构
+# NL-Find Project Architecture
 
-## 系统架构图
+This document outlines the software architecture of the NL-Find application, including its main components, their interactions, and the overall data flow.
 
-```txt
-┌─────────────────────────────────────────────────────────────┐
-│                      用户界面层                              │
-│  ┌─────────────────────┐    ┌─────────────────────────────┐ │
-│  │   CLI (Typer)       │    │   GUI (PyQt6)               │ │
-│  │   - 命令行交互      │    │   - 文件管理器风格           │ │
-│  │   - 批处理模式      │    │   - 可视化搜索结果           │ │
-│  └──────────┬──────────┘    └──────────────┬──────────────┘ │
-└─────────────┼──────────────────────────────┼────────────────┘
-              │                              │
-              ▼                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      核心引擎层                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │                  SearchEngine                           ││
-│  │  ┌───────────────┐                   ┌───────────────┐ ││
-│  │  │  LLMParser    │ ────────────────→ │SearchExecutor │ ││
-│  │  │  自然语言解析  │    SearchQuery    │  搜索执行     │ ││
-│  │  └───────────────┘                   └───────────────┘ ││
-│  └─────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-              │                              │
-              ▼                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      基础设施层                              │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐ │
-│  │   LLM Provider  │ │   File System   │ │   Config      │ │
-│  │   OpenAI/Ollama │ │   OS API        │ │   Settings    │ │
-│  └─────────────────┘ └─────────────────┘ └───────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+## 1. System Architecture Diagram
+
+The application follows a classic three-layer architecture pattern, separating the user interface, core business logic, and infrastructure services.
+
+```mermaid
+graph TD
+    subgraph A [User Interface Layer]
+        CLI[CLI (Typer)]
+        GUI[GUI (PyQt6)]
+    end
+
+    subgraph B [Core Engine Layer]
+        LLMParser[LLMParser]
+        Executor[SearchExecutor]
+        Models[Data Models (Pydantic)]
+        Backends[Search Backends]
+    end
+
+    subgraph C [Infrastructure Layer]
+        LLM[LLM Provider API]
+        FS[File System]
+        Config[Configuration]
+    end
+
+    A -- User Input --> B
+    B -- Uses --> C
+
+    CLI --> LLMParser
+    GUI --> LLMParser
+    LLMParser -- SearchQuery --> Executor
+
+    Executor -- Uses --> Backends
+    Executor -- Reads/Writes --> FS
+
+    Backends -- Reads --> FS
+    LLMParser -- HTTP Request --> LLM
+    B -- Reads --> Config
 ```
+
+- **User Interface Layer**: Provides the entry points for user interaction (CLI and GUI). This layer is responsible for presenting data and capturing user input, but contains no business logic.
+- **Core Engine Layer**: The heart of the application. It encapsulates the main business logic: parsing natural language, executing searches, and managing data.
+- **Infrastructure Layer**: Provides low-level services, such as interacting with the file system, making API calls to LLM providers, and loading configuration.
 
 ---
 
-## 目录结构
+## 2. Directory Structure
+
+The project is organized into modules with clear responsibilities.
 
 ```txt
-d:/code/find/
+D:/code/find/
 ├── src/
-│   ├── core/                 # 核心业务逻辑
-│   │   ├── __init__.py
-│   │   ├── models.py         # 数据模型 (Pydantic)
-│   │   ├── llm_parser.py     # LLM 自然语言解析
-│   │   ├── executor.py       # 搜索执行
-│   │   ├── backends/         # 搜索后端 (fd, find, python)
-│   │   └── exceptions.py     # 自定义异常
-│   │
-│   ├── cli/                  # 命令行界面
-│   │   ├── __init__.py
-│   │   └── app.py            # Typer CLI 入口
-│   │
-│   ├── gui/                  # 图形界面
-│   │   ├── __init__.py
-│   │   ├── app.py            # PyQt6 应用入口
-│   │   ├── main_window.py    # 主窗口
-│   │   ├── widgets/          # UI 组件
-│   │   │   ├── search_bar.py
-│   │   │   ├── file_list.py
-│   │   │   ├── dir_tree.py
-│   │   │   └── preview.py
-│   │   └── styles/           # QSS 样式
-│   │       └── dark.qss
-│   │
-│   └── config/               # 配置管理
-│       ├── __init__.py
-│       └── settings.py       # Pydantic Settings
+│   ├── cli/app.py            # CLI entry point (Typer)
+│   ├── config/settings.py      # Configuration models (Pydantic)
+│   ├── core/                   # Core application logic
+│   │   ├── backends.py         # Search backend implementations (fd, find, etc.)
+│   │   ├── executor.py         # Main search execution orchestrator
+│   │   ├── llm_parser.py       # Natural language parsing with LLM
+│   │   ├── models.py           # Data models (SearchQuery, FileInfo, etc.)
+│   │   └── exceptions.py       # Custom exception classes
+│   ├── gui/                    # GUI application (PyQt6)
+│   │   ├── main_window.py      # Main window and application entry point
+│   │   └── widgets/            # Reusable UI components
+│   │       ├── dir_tree.py
+│   │       ├── file_list.py
+│   │       └── search_bar.py
+│   └── __main__.py           # Allows running with `python -m src`
 │
-├── tests/                    # 测试
-│   ├── test_parser.py
-│   ├── test_executor.py
-│   └── conftest.py
-│
-├── docs/                     # 文档
-│   ├── plan.md
-│   ├── code_style.md
-│   └── architecture.md
-│
-├── config.example.yaml       # 配置示例
-├── pyproject.toml            # 项目配置
-├── requirements.txt          # 依赖
+├── tests/                    # Unit and integration tests
+├── docs/                     # Project documentation
+├── .env.example              # Example environment file for configuration
+├── pyproject.toml            # Project metadata and dependencies (Poetry/PEP 621)
 └── README.md
 ```
 
 ---
 
-## 核心模块说明
+## 3. Core Components
 
-### 1. LLMParser
+### `core.models`
+- **Purpose**: Defines the data structures used throughout the application.
+- **Technology**: Pydantic.
+- **Key Models**:
+    - `SearchQuery`: The structured output from the `LLMParser`, containing all search criteria.
+    - `SearchParams`: Wraps a `SearchQuery` with execution parameters like sorting and limits.
+    - `FileInfo`: Represents a single file in the search results.
+    - `SearchResult`: The final object returned by the executor, containing results and metadata.
 
-**职责**: 将自然语言转换为结构化查询
+### `core.llm_parser.LLMParser`
+- **Purpose**: Converts a user's natural language query into a structured `SearchQuery` object.
+- **Process**:
+    1. Injects the user's query and current date information into a detailed system prompt.
+    2. Sends the prompt to an LLM provider (e.g., OpenAI, Ollama).
+    3. Receives a JSON response.
+    4. Cleans and validates the JSON data.
+    5. Instantiates and returns a `SearchQuery` model.
 
-```python
-class LLMParser:
-    def parse(self, query: str) -> SearchQuery:
-        """
-        输入: "找出最近一周修改的大于 10MB 的 PDF"
-        输出: SearchQuery(
-            extensions=[".pdf"],
-            min_size=10*1024*1024,
-            modified_after=datetime.now() - timedelta(days=7)
-        )
-        """
-```
+### `core.executor.SearchExecutor`
+- **Purpose**: Orchestrates the file search process.
+- **Process**:
+    1. Receives `SearchParams`.
+    2. Selects the best available `SearchBackend` (e.g., `FdBackend`).
+    3. Calls the backend's `search` method to get an initial list of candidate files.
+    4. Performs post-filtering in Python for complex criteria not handled by the backend (like content search).
+    5. Sorts and limits the results.
+    6. Returns a `SearchResult` object.
 
-### 2. SearchExecutor
+### `core.backends`
+- **Purpose**: Provides concrete implementations for searching the file system.
+- **Strategy**: A pluggable system where each backend is a class inheriting from the `SearchBackend` ABC. This allows leveraging fast, native tools.
+- **Implementations**: `FdBackend`, `EverythingBackend`, `FindBackend`, `PythonBackend`.
 
-**职责**: 执行文件系统搜索
+---
 
-```python
-class SearchExecutor:
-    def execute(self, params: SearchParams) -> SearchResult:
-        """遍历文件系统，返回匹配的文件列表"""
+## 4. Data Flow
+
+This diagram shows the journey from user input to final results.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI (CLI/GUI)
+    participant LLMParser
+    participant SearchExecutor
+    participant SearchBackend
+    participant FileSystem
+
+    User->>UI: Enters query: "large python files"
+    UI->>LLMParser: parse("large python files")
+
+    activate LLMParser
+    LLMParser->>LLM API: Sends prompt + query
+    LLM API-->>LLMParser: Returns JSON: { "extensions": [".py"], "min_size": 1048576 }
+    LLMParser-->>UI: Returns SearchQuery object
+    deactivate LLMParser
+
+    UI->>SearchExecutor: execute(SearchParams)
+    activate SearchExecutor
+    SearchExecutor->>SearchBackend: select_backend()
+    SearchExecutor->>SearchBackend: search(SearchQuery)
+    
+    activate SearchBackend
+    SearchBackend->>FileSystem: Executes command (e.g., `fd --extension py --size +1M`)
+    FileSystem-->>SearchBackend: Returns file paths
+    SearchBackend-->>SearchExecutor: Yields file paths
+    deactivate SearchBackend
+
+    SearchExecutor->>FileSystem: stat(file) for sorting/filtering
+    SearchExecutor-->>UI: Returns SearchResult object
+    deactivate SearchExecutor
+
+    UI->>User: Displays formatted results
 ```
 
 ---
 
-## 数据流
+## 5. GUI Component Architecture
 
-```txt
-用户输入 "找出最近修改的 Python 文件"
-          │
-          ▼
-    ┌───────────┐
-    │ LLMParser │  调用 LLM API
-    └─────┬─────┘
-          │
-          ▼
-    SearchQuery(extensions=[".py"], modified_after=...)
-          │
-          ▼
-    ┌────────────────┐
-    │ SearchExecutor │  遍历文件系统
-    └───────┬────────┘
-          │
-          ▼
-    SearchResult(files=[...])  返回给 CLI/GUI 显示
-```
-
----
-
-## GUI 组件架构
+The GUI is built with PyQt6 and follows a standard composite view pattern.
 
 ```txt
 MainWindow
-├── SearchBar          # 搜索输入
-├── HSplitter
-│   ├── DirectoryTree  # 左侧目录树
-│   └── VSplitter
-│       ├── FileList   # 文件列表（表格/图标视图）
-│       └── Preview    # 预览面板（可选）
-└── StatusBar          # 状态信息
+├── SearchBar          # Search input and LLM toggle
+├── QSplitter
+│   ├── DirectoryTree  # Left-side directory navigation tree
+│   └── FileListWidget # Right-side file results table
+└── QStatusBar         # Status messages (e.g., "Searching...", "Ready")
 ```
 
----
-
-## 扩展点
-
-| 扩展点 | 说明 |
-|--------|------|
-| LLM Provider | 可添加新的 LLM 提供商 |
-| Search Backend | 可集成 Everything、fd 等工具 |
-| File Preview | 可添加新的文件类型预览器 |
-| Export Format | 可添加新的结果导出格式 |
+- **`MainWindow`**: The top-level window, responsible for layout and connecting signals/slots.
+- **`SearchBar`**: Emits a `search_requested` signal when the user initiates a search.
+- **`DirectoryTree`**: Allows the user to select the search directory. Emits a `path_selected` signal.
+- **`FileListWidget`**: Displays the `FileInfo` objects from a `SearchResult`.
+- **`SearchWorker` (QThread)**: Searches are run in a background thread to prevent the UI from freezing. It communicates with the main thread via signals (`finished`, `error`).

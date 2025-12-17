@@ -1,61 +1,70 @@
-# NL-Find 项目任务计划
+# NL-Find Project Plan
 
-## 项目概述
+This document outlines the development plan, phases, and milestones for the NL-Find project.
 
-**NL-Find** - 基于 LLM 的自然语言文件搜索工具
+## 1. Project Overview
 
-将自然语言查询转换为文件系统搜索命令，同时提供 CLI 和 GUI 两种交互方式。
-
----
-
-## 技术栈
-
-| 组件 | 技术 |
-|------|------|
-| 语言 | Python 3.11+ |
-| GUI | PyQt6 |
-| CLI | Typer |
-| LLM | LangChain + OpenAI/Ollama |
-| 配置 | Pydantic Settings |
+**NL-Find** is a file search utility that uses Large Language Models (LLMs) to enable searching with natural language queries. It provides both a Command-Line Interface (CLI) for power users and a Graphical User Interface (GUI) for visual interaction.
 
 ---
 
-## 开发阶段
+## 2. Technology Stack
 
-### Phase 1: 核心引擎 ✅
-
-- [x] 搭建项目结构
-- [x] 实现 LLM 解析器 (`llm_parser.py`)
-- [x] 实现搜索执行器 (`executor.py`)
-- [x] 编写核心模块单元测试 (20 passed)
-
-### Phase 2: CLI 界面 ✅
-
-- [x] 实现 Typer CLI 应用
-- [x] 支持单次查询和直接模式
-- [x] 添加参数：路径、输出格式、排序
-
-### Phase 3: GUI 界面 ✅
-
-- [x] 主窗口布局（文件管理器风格）
-- [x] 目录树组件
-- [x] 文件列表组件（表格视图）
-- [x] 搜索栏组件
-- [ ] 文件预览面板（可选）
-
-### Phase 4: 完善与打包
-
-- [x] 配置管理系统
-- [ ] 集成测试
-- [ ] PyInstaller 打包
-- [ ] 编写用户文档
+| Component         | Technology / Library                                       |
+|-------------------|------------------------------------------------------------|
+| **Language**      | Python 3.11+                                               |
+| **CLI**           | Typer, Rich                                                |
+| **GUI**           | PyQt6                                                      |
+| **LLM Integration** | `openai` library (compatible with any OpenAI-like API)     |
+| **Configuration** | Pydantic Settings                                          |
+| **Testing**       | Pytest                                                     |
+| **Formatting**    | Black, isort, Ruff                                         |
 
 ---
 
-## 里程碑
+## 3. Development Phases
 
-| 里程碑 | 目标 | 预计完成 |
-|--------|------|----------|
-| M1 | CLI 可用 | Phase 2 结束 |
-| M2 | GUI 可用 | Phase 3 结束 |
-| M3 | 发布 v1.0 | Phase 4 结束 |
+### Phase 1: Core Engine ✅
+
+- [x] **Project Scaffolding**: Set up the initial directory structure, `pyproject.toml`, and Git repository.
+- [x] **Data Models**: Define core data structures (`SearchQuery`, `FileInfo`, etc.) using Pydantic.
+- [x] **LLM Parser**: Implement the `LLMParser` to convert natural language into a `SearchQuery`.
+- [x] **Search Executor**: Implement the `SearchExecutor` to orchestrate searches.
+- [x] **Pluggable Backends**: Create the backend system and implement the `PythonBackend` as a fallback.
+- [x] **Unit Tests**: Write initial tests for the core components.
+
+### Phase 2: Advanced Backends & CLI ✅
+
+- [x] **High-Speed Backends**: Implement `FdBackend`, `EverythingBackend`, and `FindBackend`.
+- [x] **Backend Selection**: Implement auto-selection logic for the best available backend.
+- [x] **CLI Implementation**: Build the Typer-based CLI with the `search` command and options.
+- [x] **CLI Output**: Format and display results in the console using Rich.
+
+### Phase 3: GUI Implementation ✅
+
+- [x] **Main Window Layout**: Design and implement the main window with a file manager style.
+- [x] **Core Widgets**: Build the `DirectoryTree`, `FileListWidget`, and `SearchBar` components.
+- [x] **Background Searches**: Implement `QThread` worker to run searches without freezing the UI.
+- [x] **Signal/Slot Connections**: Wire up the GUI components to interact with the core engine.
+- [ ] **File Preview Panel**: (Optional) Add a panel to show a preview of the selected file.
+- [ ] **Theme Switching**: (Optional) Allow users to switch between light and dark themes.
+
+### Phase 4: Refinement & Packaging 🚧
+
+- [x] **Configuration System**: Implement a robust configuration system using Pydantic Settings (`.env` support).
+- [ ] **Integration Testing**: Add end-to-end tests for CLI and GUI workflows.
+- [🚧] **User Documentation**: Write comprehensive user and developer documentation.
+- [ ] **Packaging**: Create distributable packages using PyInstaller or a similar tool.
+- [ ] **CI/CD**: Set up a GitHub Actions workflow for automated testing and linting.
+
+---
+
+## 4. Milestones
+
+| Milestone | Goal                                         | Status      |
+|-----------|----------------------------------------------|-------------|
+| **M1**    | Core engine and basic CLI are functional.    | ✅ Complete |
+| **M2**    | Advanced backends and a feature-complete CLI.| ✅ Complete |
+| **M3**    | A functional GUI is available.               | ✅ Complete |
+| **M4**    | Project is well-documented and packageable.  | 🚧 In Progress |
+| **v1.0**  | First official release.                      | ⏳ Pending   |

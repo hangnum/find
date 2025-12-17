@@ -1,108 +1,178 @@
-# NL-Find
+# NL-Find: Natural Language File Search
 
-**Natural Language File Search** - 使用自然语言搜索文件的智能工具
+**NL-Find** is an intelligent file search tool that allows you to find files on your system using natural language queries. It combines the power of Large Language Models (LLMs) with high-speed local search backends.
 
-## 功能
+![GUI Screenshot](https://raw.githubusercontent.com/your-username/nl-find/main/docs/assets/gui-screenshot.png)
+*(Note: Replace with an actual screenshot)*
 
-- 🧠 **LLM 驱动** - 自然语言转换为搜索命令
-- 💻 **命令行界面** - 快速高效的 CLI
-- 🖥️ **图形界面** - 类似文件管理器的 GUI
+## ✨ Features
 
-## 安装
+- 🧠 **LLM-Powered Search**: Describe the files you want in plain language (e.g., "find large video files modified last week").
+- ⚡ **High-Speed Backends**: Automatically uses the fastest available search tools on your system (`fd`, `Everything`, `find`).
+- 💻 **Versatile Interfaces**: Use it as a fast command-line tool or a user-friendly GUI application.
+- 🌐 **Provider Agnostic**: Compatible with any OpenAI API-compliant LLM provider (OpenAI, DeepSeek, Ollama, etc.).
+- ⚙️ **Customizable**: Extensive configuration options for search behavior, LLM settings, and UI.
+-  fallback **Direct Search**: Bypass the LLM for traditional glob/pattern-based searches.
+
+## 🚀 Quick Start
+
+### 1. Installation
 
 ```bash
-# 安装依赖
+# Clone the repo and install in editable mode
+git clone https://github.com/your-username/nl-find.git
+cd nl-find
 pip install -e .
 
-# 安装 GUI 支持
+# Install GUI dependencies (PyQt6)
 pip install -e ".[gui]"
 
-# 安装开发依赖
-pip install -e ".[dev]"
+# For best performance, install a native search backend (see "Search Backends" below)
+# On Windows: winget install sharkdp.fd
+# On macOS: brew install fd
 ```
 
-## 使用
+### 2. Configuration
 
-### 命令行
+To use the natural language search, you need to configure an LLM API key.
+
+Create a file named `.env` in the project root and add your details:
+
+```env
+# Example for OpenAI
+OPENAI_API_KEY="sk-..."
+
+# Example for a local Ollama server
+LLM_BASE_URL="http://localhost:11434/v1"
+LLM_API_KEY="ollama"
+LLM_MODEL="llama3"
+```
+
+The tool will automatically load these settings. Alternatively, you can set them as environment variables.
+
+### 3. Run a Search
 
 ```bash
-# 自然语言搜索（需要 OPENAI_API_KEY）
-nfi search "找出最近修改的 Python 文件"
+# Use natural language to find recent large images
+nfi search "find images larger than 5MB modified this week"
 
-# 直接模式搜索（无需 API）
-nfi search "*.py" --no-llm --path ./src
-
-# 查看帮助
-nfi --help
+# Or use the GUI
+python -m src.gui.main_window
 ```
 
-### 图形界面
+## 📖 Usage
+
+### Command-Line Interface (CLI)
+
+The `nfi search` command is the primary entry point.
+
+```bash
+# Natural language search (requires API key)
+nfi search "show me python files I changed yesterday"
+
+# Direct pattern search (no LLM needed)
+nfi search "*.py" --no-llm --path ./src
+
+# Search for files with specific content
+nfi search "text files containing the word 'refactor'"
+
+# Limit results and sort by size
+nfi search "videos" --limit 10 --sort size --desc
+
+# See all options
+nfi search --help
+```
+
+### Graphical User Interface (GUI)
+
+The GUI provides a familiar file-explorer-like experience.
 
 ```bash
 python -m src.gui.main_window
 ```
 
-## 配置
+You can type a natural language query or a direct pattern into the search bar. Use the "LLM" checkbox to toggle between modes.
 
-设置环境变量：
+## ⚙️ Configuration
+
+NL-Find is configured via environment variables or a `.env` file in the project root.
+
+### LLM Settings (Prefix: `LLM_`)
+
+- `LLM_API_KEY` or `OPENAI_API_KEY`: Your API key.
+- `LLM_MODEL`: The model name (e.g., `gpt-4o-mini`, `llama3`).
+- `LLM_BASE_URL`: The API endpoint URL for custom providers.
+- `LLM_PROVIDER`: A descriptive name for your provider (e.g., `openai`, `ollama`).
+- `LLM_TEMPERATURE`: Defaults to `0.0`.
+
+### Search Settings (Prefix: `SEARCH_`)
+
+- `SEARCH_BACKEND`: Set a preferred backend (`auto`, `fd`, `everything`, `find`, `python`). Defaults to `auto`.
+- `SEARCH_DEFAULT_PATH`: The directory to search if `--path` is not specified.
+- `SEARCH_MAX_RESULTS`: Default result limit. Defaults to `1000`.
+
+## ⚡ Search Backends
+
+NL-Find automatically selects the best available search tool for maximum speed.
+
+| Backend      | Platform    | Speed     | Notes                                   |
+|--------------|-------------|-----------|-----------------------------------------|
+| `everything` | Windows     | ⚡⚡⚡⚡    | Instant results via NTFS indexing.      |
+| `fd`         | Cross-Platform| ⚡⚡⚡     | A fast, modern `find` alternative. Recommended. |
+| `find`       | Linux/macOS | ⚡⚡      | The standard, reliable Unix find tool.    |
+| `python`     | Cross-Platform| ⚡         | The fallback backend, always available. |
+
+### Installing Backends
 
 ```bash
-export OPENAI_API_KEY=your_api_key
+# Windows: Install fd and/or Everything
+winget install sharkdp.fd
+# Or use the provided script to install Everything
+# scripts\install_everything.bat
+
+# macOS: Install fd via Homebrew
+brew install fd
+
+# Linux: Install fd via your package manager
+sudo apt-get install fd-find  # Debian/Ubuntu
+sudo dnf install fd-find      # Fedora
 ```
 
-## 开发
+## 🛠️ Development
 
 ```bash
-# 格式化代码
-black . && isort . && ruff check --fix .
+# Install all development dependencies
+pip install -e ".[dev]"
 
-# 运行测试
+# Format code
+ruff format . && ruff check --fix . && black . && isort .
+
+# Run tests
 pytest -v
 ```
 
-## 项目结构
+## 🏗️ Project Structure
 
 ```txt
-src/
-├── core/       # 核心搜索引擎
-├── cli/        # 命令行界面
-├── gui/        # 图形界面
-└── config/     # 配置管理
-tests/          # 测试
-docs/           # 文档
+.
+├── .env.example      # Example environment file
+├── pyproject.toml    # Project metadata and dependencies
+├── README.md         # This file
+├── requirements.txt
+├── src/
+│   ├── cli/app.py        # CLI entry point (Typer)
+│   ├── config/settings.py  # Configuration models (Pydantic)
+│   ├── core/               # Core application logic
+│   │   ├── backends.py     # Search backend implementations
+│   │   ├── executor.py     # Main search execution orchestrator
+│   │   ├── llm_parser.py   # Natural language parsing with LLM
+│   │   └── models.py       # Data models (Pydantic)
+│   ├── gui/main_window.py  # GUI entry point (PyQt6)
+│   └── __main__.py       # Allows running with `python -m src`
+├── tests/              # Unit and integration tests
+└── docs/               # Project documentation
 ```
 
-## 搜索后端
+## 📄 License
 
-NL-Find 支持多种搜索后端，自动选择最优方案：
-
-| 后端 | 平台 | 速度 | 说明 |
-|------|------|------|------|
-| **fd** | 跨平台 | ⚡⚡⚡ | 推荐安装，比 Python 快 10 倍 |
-| Everything | Windows | ⚡⚡⚡⚡ | 毫秒级搜索（基于索引） |
-| find | Linux/macOS | ⚡⚡ | 系统原生 |
-| Python | 跨平台 | ⚡ | 默认回退 |
-
-### 安装高速后端
-
-```bash
-# Windows - 安装 fd
-winget install sharkdp.fd
-
-# Windows - 安装 Everything (可选)
-scripts\install_everything.bat
-
-# Linux/macOS - 安装 fd
-./scripts/install_fd.sh
-```
-
-### 配置后端
-
-```bash
-# 环境变量配置
-SEARCH_BACKEND=auto  # auto, fd, find, everything, python
-```
-
-## License
-
-MIT
+This project is licensed under the MIT License.

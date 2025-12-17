@@ -1,72 +1,73 @@
-# NL-Find: Natural Language File Search
+# Gemini Agent Project Brief: NL-Find
 
-## Project Overview
+This document provides a high-level overview of the **NL-Find** project, its architecture, and development conventions. It is intended to be a starting point for an AI agent developer.
 
-NL-Find is a Python-based utility designed to search for files using natural language queries. It leverages a Large Language Model (LLM) to parse user input and translate it into file system search commands. The project is planned to have both a Command-Line Interface (CLI) built with Typer and a Graphical User Interface (GUI) built with PyQt6.
+## 1. Project Objective
 
-The architecture is composed of three main layers:
+NL-Find is a functional Python application that enables users to search for files using natural language. It integrates with Large Language Models (LLMs) to parse queries and uses optimized backend tools to perform fast and accurate file system searches. The project has both a command-line (CLI) and a graphical (GUI) interface.
 
-1. **User Interface Layer:** CLI and GUI for user interaction.
-2. **Core Engine Layer:** Handles the core logic of parsing queries, generating search commands, and executing the search.
-3. **Infrastructure Layer:** Manages interactions with the LLM, file system, and configuration.
+## 2. Current Status
 
-The project is in its early planning and setup stages. The core source code is not yet implemented, but the project structure and development guidelines are well-documented.
+The project has implementations for its core engine, CLI, and GUI. It is a functional application that can be run and tested. Key features like natural language parsing, pluggable search backends, and user configuration are in place.
 
-## Building and Running
+## 3. Key Components & Architecture
 
-The project is not yet runnable. However, the development conventions specify the tools and commands for linting, formatting, and testing.
+The application is built on a three-layer architecture: **UI**, **Core Engine**, and **Infrastructure**.
 
-### Linting and Formatting
+- **`src/cli/app.py` (Typer)**: The command-line interface.
+- **`src/gui/main_window.py` (PyQt6)**: The graphical user interface.
+- **`src/core/llm_parser.py`**: The `LLMParser` class uses an LLM to convert natural language queries into a structured `SearchQuery` Pydantic model.
+- **`src/core/executor.py`**: The `SearchExecutor` takes a `SearchQuery` and orchestrates the search.
+- **`src/core/backends.py`**: Defines the pluggable search backends (`fd`, `Everything`, `find`, `python`), which are selected based on availability and user preference.
+- **`src/core/models.py`**: Contains all Pydantic data models for structured data transfer (e.g., `SearchQuery`, `FileInfo`).
+- **`src/config/settings.py`**: Manages application configuration using `pydantic-settings`, loading from environment variables and `.env` files.
 
-The project uses `black` for formatting, `isort` for import sorting, and `ruff` for linting.
+## 4. Building and Running
 
+### Installation
 ```bash
-# Format, sort imports, and lint the code
-black . && isort . && ruff check --fix .
+# Install base dependencies in editable mode
+pip install -e .
+
+# Install GUI dependencies
+pip install -e ".[gui]"
+
+# Install development dependencies
+pip install -e ".[dev]"
 ```
 
-### Testing
-
-The project uses `pytest` for testing.
-
+### Running the Application
 ```bash
-# Run tests
-pytest
+# Run the CLI (requires configuration, see README.md)
+nfi search "find recent python files"
+
+# Run the GUI
+python -m src.gui.main_window
 ```
 
-## Development Conventions
+## 5. Development Conventions
 
-### Code Style
+Strict adherence to the project's established conventions is required. Refer to the `docs` directory for detailed guidelines.
 
-- **Formatting:** `black` (line width 88), `isort`, `ruff`.
-- **Type Hinting:** All public functions must be type-annotated.
-- **Naming:** `snake_case` for modules and functions/variables, `PascalCase` for classes.
-- **Docstrings:** Google-style docstrings are required.
-- **Error Handling:** Custom exceptions are defined in `src/core/exceptions.py`. Avoid bare `except:` clauses.
-- **Logging:** Use `loguru` or the standard `logging` library.
-- **Configuration:** `pydantic-settings` is used for configuration management. API keys and other secrets are loaded from environment variables, while user settings are stored in `config.yaml`.
+### Code Style (`docs/code_style.md`)
+- **Formatting**: `black`, `isort`, `ruff`. All tools are configured in `pyproject.toml`.
+- **Type Hinting**: All public functions must be fully type-annotated.
+- **Docstrings**: Google-style docstrings are required for all public modules and functions.
+- **Logging**: Use the `loguru` library for logging.
 
-### Git and Versioning
+### Git Conventions (`docs/git_conventions.md`)
+- **Commits**: Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification (e.g., `feat:`, `fix:`, `docs:`).
 
-- **Branching:** A `main`/`dev` branching model is used, with feature, fix, and refactor branches.
-- **Commits:** The project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
-- **Pull Requests:** PRs should have a descriptive title and follow the provided template.
-- **Versioning:** [Semantic Versioning (SemVer)](https://semver.org/) is used for versioning.
+### Testing (`docs/testing.md`)
+- **Framework**: `pytest` is used for all tests.
+- **Execution**: All new code (features or fixes) should be accompanied by corresponding tests.
 
-### 运行环境
-
-conda base 环境下运行
-
-### 要求
-
-代码风格遵循docs/code_style.md
-项目架构遵循docs/architecture.md
-项目计划遵循docs/plan.md
-项目提交规范遵循docs/git_conventions.md
-测试规范遵循docs/testing.md
-
-每次在开始任务时以及调用子agents时，加载代码风格、测试和提交规范，并严格遵守
-
-严禁乱提交，必须按照文档中的规范进行提交
-禁止随意放文档，文档和测试文件必须放置在固定的文件夹下
-完成子任务之后，及时进行测试，更新文档，以及提交
+### Commands
+- **Formatting & Linting**:
+  ```bash
+  ruff format . && ruff check --fix . && black . && isort .
+  ```
+- **Testing**:
+  ```bash
+  pytest -v
+  ```
