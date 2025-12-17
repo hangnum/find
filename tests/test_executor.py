@@ -341,3 +341,79 @@ class TestSearchExecutor:
         assert result.total_count == 2
         assert all(f.extension == ".py" for f in result.files)
 
+    def test_sort_then_limit_returns_largest_files(self, tmp_path: Path):
+        """Test that sorting happens BEFORE limit is applied.
+        
+        This validates the fix for the sort+limit semantic bug where
+        files were limited before sorting, causing incorrect top-N results.
+        """
+        # Create files with known, different sizes
+        (tmp_path / "small.txt").write_bytes(b"x" * 100)  # 100 bytes
+        (tmp_path / "medium.txt").write_bytes(b"x" * 1000)  # 1KB
+        (tmp_path / "large.txt").write_bytes(b"x" * 10000)  # 10KB
+        (tmp_path / "huge.txt").write_bytes(b"x" * 100000)  # 100KB
+
+        executor = SearchExecutor()
+        query = SearchQuery(path=tmp_path)
+        params = SearchParams(
+            query=query,
+            sort_by=SortField.SIZE,
+            sort_order=SortOrder.DESC,
+            limit=2,
+        )
+
+        result = executor.execute(params)
+
+        # Should get the 2 LARGEST files (huge.txt and large.txt)
+        assert len(result.files) == 2
+        assert result.files[0].name == "huge.txt"
+        assert result.files[1].name == "large.txt"
+
+    def test_sort_then_limit_returns_smallest_files(self, tmp_path: Path):
+        """Test sort ascending + limit returns smallest files."""
+        (tmp_path / "small.txt").write_bytes(b"x" * 100)
+        (tmp_path / "medium.txt").write_bytes(b"x" * 1000)
+        (tmp_path / "large.txt").write_bytes(b"x" * 10000)
+
+        executor = SearchExecutor()
+        query = SearchQuery(path=tmp_path)
+        params = SearchParams(
+            query=query,
+            sort_by=SortField.SIZE,
+            sort_order=SortOrder.ASC,
+            limit=2,
+        )
+
+        result = executor.execute(params)
+
+        # Should get the 2 SMALLEST files
+        assert len(result.files) == 2
+        assert result.files[0].name == "small.txt"
+        assert result.files[1].name == "medium.txt"
+
+    def test_sort_by_created(self, temp_files: Path):
+        """Test sorting by created date."""
+        executor = SearchExecutor()
+        query = SearchQuery(path=temp_files, recursive=False)
+        params = SearchParams(
+            query=query, sort_by=SortField.CREATED, sort_order=SortOrder.ASC
+        )
+
+        result = executor.execute(params)
+
+        dates = [f.created for f in result.files]
+        assert dates == sorted(dates)
+
+    def test_sort_by_created_desc(self, temp_files: Path):
+        """Test sorting by created date descending."""
+        executor = SearchExecutor()
+        query = SearchQuery(path=temp_files, recursive=False)
+        params = SearchParams(
+            query=query, sort_by=SortField.CREATED, sort_order=SortOrder.DESC
+        )
+
+        result = executor.execute(params)
+
+        dates = [f.created for f in result.files]
+        assert dates == sorted(dates, reverse=True)
+
