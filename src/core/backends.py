@@ -8,8 +8,8 @@ and user configuration.
 import shutil
 import subprocess
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional
 
 from loguru import logger
 
@@ -64,7 +64,6 @@ class PythonBackend(SearchBackend):
         Yields:
             Path objects for each matching file.
         """
-        import fnmatch
 
         try:
             if query.recursive:
@@ -142,7 +141,7 @@ class FdBackend(SearchBackend):
 
     name = "fd"
 
-    def __init__(self, fd_path: Optional[str] = None):
+    def __init__(self, fd_path: str | None = None):
         """Initialize fd backend.
 
         Args:
@@ -344,7 +343,7 @@ class EverythingBackend(SearchBackend):
 
     name = "everything"
 
-    def __init__(self, es_path: Optional[str] = None):
+    def __init__(self, es_path: str | None = None):
         """Initialize Everything backend.
 
         Args:
@@ -438,11 +437,11 @@ class EverythingBackend(SearchBackend):
         import platform
         if platform.system() != "Windows":
             return False
-        
+
         # Check for es.exe
         if shutil.which("es"):
             return True
-        
+
         common_paths = [
             r"C:\Program Files\Everything\es.exe",
             r"C:\Program Files (x86)\Everything\es.exe",

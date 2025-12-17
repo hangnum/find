@@ -1,7 +1,7 @@
 """Configuration settings for NL-Find."""
 
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -33,11 +33,11 @@ class LLMSettings(BaseSettings):
 
     provider: str = "openai"
     model: str = "gpt-4o-mini"
-    api_key: Optional[str] = Field(
+    api_key: str | None = Field(
         default=None,
         validation_alias=AliasChoices("LLM_API_KEY", "OPENAI_API_KEY"),
     )
-    base_url: Optional[str] = None
+    base_url: str | None = None
     temperature: float = 0.0
     max_tokens: int = 1024
 
@@ -104,7 +104,7 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-_settings: Optional[Settings] = None
+_settings: Settings | None = None
 
 
 def get_settings() -> Settings:

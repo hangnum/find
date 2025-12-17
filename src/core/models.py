@@ -3,7 +3,6 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -50,13 +49,13 @@ class SearchQuery(BaseModel):
     """
 
     path: Path = Field(default_factory=Path.cwd)
-    pattern: Optional[str] = None
+    pattern: str | None = None
     extensions: list[str] = Field(default_factory=list)
-    min_size: Optional[int] = None
-    max_size: Optional[int] = None
-    modified_after: Optional[datetime] = None
-    modified_before: Optional[datetime] = None
-    content_pattern: Optional[str] = None
+    min_size: int | None = None
+    max_size: int | None = None
+    modified_after: datetime | None = None
+    modified_before: datetime | None = None
+    content_pattern: str | None = None
     include_hidden: bool = False
     recursive: bool = True
 
