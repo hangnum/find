@@ -168,7 +168,7 @@ pytest -v
 │   │   ├── llm_parser.py   # Natural language parsing with LLM
 │   │   └── models.py       # Data models (Pydantic)
 │   ├── gui/main_window.py  # GUI entry point (PyQt6)
-│   └── __main__.py       # Allows running with `python -m src`
+│   └── __main__.py       # Allows running with `python -m nl_find`
 ├── tests/              # Unit and integration tests
 └── docs/               # Project documentation
 ```
