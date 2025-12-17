@@ -17,10 +17,10 @@
 │                      核心引擎层                              │
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │                  SearchEngine                           ││
-│  │  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ││
-│  │  │  LLMParser    │→│CommandGenerator│→│SearchExecutor │ ││
-│  │  │  自然语言解析  │ │  命令生成     │ │  搜索执行     │ ││
-│  │  └───────────────┘ └───────────────┘ └───────────────┘ ││
+│  │  ┌───────────────┐                   ┌───────────────┐ ││
+│  │  │  LLMParser    │ ────────────────→ │SearchExecutor │ ││
+│  │  │  自然语言解析  │    SearchQuery    │  搜索执行     │ ││
+│  │  └───────────────┘                   └───────────────┘ ││
 │  └─────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────┘
               │                              │
@@ -45,8 +45,8 @@ d:/code/find/
 │   │   ├── __init__.py
 │   │   ├── models.py         # 数据模型 (Pydantic)
 │   │   ├── llm_parser.py     # LLM 自然语言解析
-│   │   ├── command_gen.py    # 搜索命令生成
 │   │   ├── executor.py       # 搜索执行
+│   │   ├── backends/         # 搜索后端 (fd, find, python)
 │   │   └── exceptions.py     # 自定义异常
 │   │
 │   ├── cli/                  # 命令行界面
@@ -106,23 +106,13 @@ class LLMParser:
         """
 ```
 
-### 2. CommandGenerator
-
-**职责**: 将 SearchQuery 转换为可执行的搜索参数
-
-```python
-class CommandGenerator:
-    def generate(self, query: SearchQuery) -> SearchParams:
-        """将结构化查询转换为具体的搜索参数"""
-```
-
-### 3. SearchExecutor
+### 2. SearchExecutor
 
 **职责**: 执行文件系统搜索
 
 ```python
 class SearchExecutor:
-    def execute(self, params: SearchParams) -> list[FileInfo]:
+    def execute(self, params: SearchParams) -> SearchResult:
         """遍历文件系统，返回匹配的文件列表"""
 ```
 
@@ -142,20 +132,12 @@ class SearchExecutor:
     SearchQuery(extensions=[".py"], modified_after=...)
           │
           ▼
-    ┌─────────────────┐
-    │ CommandGenerator │
-    └────────┬────────┘
-          │
-          ▼
-    SearchParams(glob="**/*.py", filters=[...])
-          │
-          ▼
     ┌────────────────┐
     │ SearchExecutor │  遍历文件系统
     └───────┬────────┘
           │
           ▼
-    list[FileInfo]  返回给 CLI/GUI 显示
+    SearchResult(files=[...])  返回给 CLI/GUI 显示
 ```
 
 ---
